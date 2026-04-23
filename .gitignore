@@ -1,0 +1,9 @@
+.env
+*.pyc
+__pycache__/
+steam/
+.dbt/
+target/
+dbt_packages/
+logs/
+.DS_Store
