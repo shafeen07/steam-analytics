@@ -1,0 +1,30 @@
+name: dbt Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dbt-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt
+        run: pip install dbt-postgres
+
+      - name: Run dbt tests
+        env:
+          DBT_DATABASE_URL: ${{ secrets.DBT_DATABASE_URL }}
+        working-directory: transform
+        run: |
+          dbt deps
+          dbt test
