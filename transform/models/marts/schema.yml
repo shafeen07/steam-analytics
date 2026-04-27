@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: dim_games
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+          - unique
+      - name: name
+        tests:
+          - not_null
+
+  - name: fct_player_history
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: current_players
+        tests:
+          - not_null
+
+  - name: mart_top_games
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+          - unique
+
+  - name: mart_genre_summary
+    columns:
+      - name: genre
+        tests:
+          - not_null
+          - unique

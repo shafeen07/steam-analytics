@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: steamspy_snapshots
+      - name: game_details
+      - name: player_snapshots
+      - name: game_details__genres
+      - name: game_details__categories

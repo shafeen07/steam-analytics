@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: stg_games
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+          - unique
+      - name: name
+        tests:
+          - not_null
+
+  - name: stg_player_snapshots
+    columns:
+      - name: app_id
+        tests:
+          - not_null
+      - name: current_players
+        tests:
+          - not_null
