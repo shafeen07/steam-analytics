@@ -2,25 +2,18 @@ import dlt
 import requests
 from datetime import datetime, timezone
 @dlt.resource(name="steamspy_snapshots", write_disposition="append")
-def steamspy_all():
+def steamspy_top100():
     import time
     snapped_at = datetime.now(timezone.utc).isoformat()
-    page = 0
     
-    while True:
-        url = f"https://steamspy.com/api.php?request=all&page={page}"
+    for request in ["top100in2weeks", "top100forever", "top100owned"]:
+        url = f"https://steamspy.com/api.php?request={request}"
         response = requests.get(url, timeout=30)
-        response.raise_for_status()
         
         try:
             data = response.json()
         except Exception:
-            print(f"Page {page}: no more data, stopping.")
-            break
-            
-        if not data:
-            print(f"Page {page}: empty response, stopping.")
-            break
+            continue
             
         for app_id, game in data.items():
             yield {
@@ -35,18 +28,15 @@ def steamspy_all():
                 "median_playtime_hrs": round(game.get("median_forever", 0) / 60, 2),
                 "price_usd": game.get("price"),
                 "discount_pct": game.get("discount", 0),
-                "tags": game.get("tags", {}),
                 "ccu": game.get("ccu", 0),
                 "snapped_at": snapped_at
             }
         
-        print(f"Page {page}: loaded {len(data)} games")
-        page += 1
-        time.sleep(1)
+        time.sleep(2)
 
 @dlt.source
 def steamspy_source():
-    return steamspy_all()
+    return steamspy_top100()
 
 if __name__ == "__main__":
     import os

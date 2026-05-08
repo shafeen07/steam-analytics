@@ -22,11 +22,11 @@ jobs:
 
       - name: Run player counts pipeline
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DBT_DATABASE_URL }}
           STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
         run: python ingestion/pipelines/player_counts.py
 
       - name: Run steamspy pipeline
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DBT_DATABASE_URL }}
         run: python ingestion/pipelines/steamspy_pipeline.py
