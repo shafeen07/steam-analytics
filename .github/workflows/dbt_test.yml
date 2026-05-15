@@ -33,14 +33,14 @@ jobs:
             outputs:
               prod:
                 type: postgres
-                host: {}
-                user: {}
-                password: {}
-                port: {}
-                dbname: {}
+                host: {host}
+                user: {user}
+                password: \"{password}\"
+                port: {port}
+                dbname: {dbname}
                 schema: transform
                 threads: 4
-          '''.format(url.hostname, url.username, url.password, url.port or 5432, url.path.lstrip('/'))
+          '''.format(host=url.hostname, user=url.username, password=url.password, port=url.port or 5432, dbname=url.path.lstrip('/'))
           os.makedirs(os.path.expanduser('~/.dbt'), exist_ok=True)
           with open(os.path.expanduser('~/.dbt/profiles.yml'), 'w') as f:
               f.write(profile)
