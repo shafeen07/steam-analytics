@@ -46,13 +46,7 @@ jobs:
               f.write(profile)
           print('dbt profile created')
           "
-      - name: Debug profile
-        working-directory: transform
-        run: |
-          echo "Files in transform:"
-          ls -la
-          echo "profiles.yml contents:"
-          cat profiles.yml
+      
 
       - name: Run dbt tests
         working-directory: transform
