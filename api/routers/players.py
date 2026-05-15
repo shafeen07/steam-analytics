@@ -22,3 +22,15 @@ def get_player_history(app_id: int, days: int = Query(30, le=90)):
     rows = cur.fetchall()
     conn.close()
     return list(rows)
+
+@router.get("/last-updated")
+def get_last_updated():
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT MAX(captured_at) as last_updated
+        FROM raw.player_snapshots
+    """)
+    row = cur.fetchone()
+    conn.close()
+    return {"last_updated": row["last_updated"].isoformat() if row["last_updated"] else None}

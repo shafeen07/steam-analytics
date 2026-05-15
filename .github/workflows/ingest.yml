@@ -2,8 +2,8 @@ name: Steam Data Ingestion
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # every 6 hours
-  workflow_dispatch:  # allows manual trigger from GitHub UI
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   ingest:
@@ -18,7 +18,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install dlt[postgres] requests python-dotenv psycopg2-binary
+        run: pip install dlt[postgres] requests python-dotenv psycopg2-binary dbt-postgres
 
       - name: Run player counts pipeline
         env:
@@ -30,3 +30,35 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DBT_DATABASE_URL }}
         run: python ingestion/pipelines/steamspy_pipeline.py
+
+      - name: Set up dbt profile
+        env:
+          DBT_DATABASE_URL: ${{ secrets.DBT_DATABASE_URL }}
+        run: |
+          python -c "
+          import os, urllib.parse
+          url = urllib.parse.urlparse(os.environ['DBT_DATABASE_URL'])
+          profile = '''steam_analytics:
+            target: prod
+            outputs:
+              prod:
+                type: postgres
+                host: {}
+                user: {}
+                password: {}
+                port: {}
+                dbname: {}
+                schema: transform
+                threads: 4
+          '''.format(url.hostname, url.username, url.password, url.port or 5432, url.path.lstrip('/'))
+          os.makedirs(os.path.expanduser('~/.dbt'), exist_ok=True)
+          with open(os.path.expanduser('~/.dbt/profiles.yml'), 'w') as f:
+              f.write(profile)
+          print('dbt profile created')
+          "
+
+      - name: Run dbt
+        working-directory: transform
+        run: |
+          dbt run
+          dbt test

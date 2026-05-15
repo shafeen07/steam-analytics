@@ -70,10 +70,24 @@ def search_games(
 def get_game(app_id: int):
     conn = get_conn()
     cur = conn.cursor()
+    
     cur.execute("""
-        SELECT * FROM transform_marts.dim_games
-        WHERE app_id = %s
+        SELECT d.*,
+            array_agg(DISTINCT g.value) FILTER (WHERE g.value IS NOT NULL) as genres,
+            array_agg(DISTINCT c.value) FILTER (WHERE c.value IS NOT NULL) as categories
+        FROM transform_marts.dim_games d
+        LEFT JOIN raw.game_details gd ON d.app_id = gd.app_id
+        LEFT JOIN raw.game_details__genres g ON g._dlt_parent_id = gd._dlt_id
+        LEFT JOIN raw.game_details__categories c ON c._dlt_parent_id = gd._dlt_id
+        WHERE d.app_id = %s
+        GROUP BY d.app_id, d.name, d.developer, d.publisher, d.is_free,
+                 d.price_usd, d.release_date, d.coming_soon, d.header_image,
+                 d.short_description, d.metacritic_score, d.recommendations,
+                 d.owners, d.positive_reviews, d.negative_reviews,
+                 d.avg_playtime_hrs, d.median_playtime_hrs, d.current_players,
+                 d.positive_pct, d.review_sentiment, d.fetched_at
     """, (app_id,))
+    
     row = cur.fetchone()
     conn.close()
     if not row:
