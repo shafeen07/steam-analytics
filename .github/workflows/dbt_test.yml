@@ -21,9 +21,33 @@ jobs:
       - name: Install dbt
         run: pip install dbt-postgres
 
-      - name: Run dbt tests
+      - name: Set up dbt profile
         env:
           DBT_DATABASE_URL: ${{ secrets.DBT_DATABASE_URL }}
+        run: |
+          python -c "
+          import os, urllib.parse
+          url = urllib.parse.urlparse(os.environ['DBT_DATABASE_URL'])
+          profile = '''steam_analytics:
+            target: prod
+            outputs:
+              prod:
+                type: postgres
+                host: {}
+                user: {}
+                password: {}
+                port: {}
+                dbname: {}
+                schema: transform
+                threads: 4
+          '''.format(url.hostname, url.username, url.password, url.port or 5432, url.path.lstrip('/'))
+          os.makedirs(os.path.expanduser('~/.dbt'), exist_ok=True)
+          with open(os.path.expanduser('~/.dbt/profiles.yml'), 'w') as f:
+              f.write(profile)
+          print('dbt profile created')
+          "
+
+      - name: Run dbt tests
         working-directory: transform
         run: |
           dbt deps
