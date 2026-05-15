@@ -59,6 +59,8 @@ jobs:
 
       - name: Run dbt
         working-directory: transform
+        env:
+          DBT_PASSWORD: ${{ secrets.DBT_PASSWORD }}
         run: |
-          dbt run
-          dbt test
+          dbt run --profiles-dir .
+          dbt test --profiles-dir .
